@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<!-- css -->
+<link
+	href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+	rel="stylesheet" />
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" />
+<link rel="stylesheet" href="./mercari.css"/>
+<!-- script -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script th:src="@{/category.js}"></script>
+<script th:src="@{/pagingButton.js}"></script>
+<script th:src="@{/resetButton.js}"></script>
+<title>Rakus Items</title>
+</head>
+<body>
+<!-- navbar -->
+<nav class="navbar navbar-inverse">
+<div class="navbar-header">
+<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<a class="navbar-brand" th:href="@{/toshowlist}">Rakus Items</a>
+</div>
+<div id="navbar" class="collapse navbar-collapse">
+<div>
+<ul class="nav navbar-nav navbar-right">
+<li><a id="logout" th:href="@{/logout}">Logout <i class="fa fa-power-off"></i></a></li>
+</ul>
+<p class="navbar-text navbar-right">
+<span id="loginName">user:<span th:text="${session.user.mailaddress}"></span></span>
+</p>
+</div>
+</div>
+</nav>
+<div id="main" class="container-fluid">
+<!-- addItem link -->
+
+	</div>
+<div id="addItemButton">
+<a class="btn btn-success" th:href="@{/insertitem/toadditem}"><i class="fa fa-plus-square-o"></i> Add New Item</a>
+</div>
+<!-- 検索フォーム -->
+<div id="forms">
+<form th:action="@{/sarchItemByItemForm}" method="post" class="form-inline" role="form"　th:object="${itemForm}">
+<div class="form-group">
+<input type="text" class="form-control" id="name" placeholder="name" th:field="*{name}"/>
+</div>
+<div class="form-group"><i class="fa fa-plus"></i></div>
+<div class="form-group">
+<select class="form-control" id="parentCategory" th:field="*{parentCategory}">
+<option value="0">- parentCategory -</option>
+<span th:each="parentCategory:${session.parentCategoryList}">
+<option th:value="${parentCategory.id}"><div th:text="${parentCategory.name}"></div></option>
+</span>
+</select>
+<select class="form-control" id="childCategory" th:field="*{childCategory}" name="childCategory">
+<option value="0">- choose parentCategory -</option>
+<div th:each="childcategory:${session.childcategoryList}">
+<option th:value="${childcategory.id}"><div th:text="${childcategory.name}"></div></option>
+</div>
+</select>
+<select class="form-control" id="grandChildCategory" th:field="*{category}" name="category">
+<option value="0">- choose childCategory -</option>
+<div th:each="grandchildcategory:${session.grandchildCategoryList}">
+<option th:value="${grandchildcategory.id}"><div th:text="${grandchildcategory.name}"></div></option>
+</div>
+
+</select>
+</div>
+<div class="form-group"><i class="fa fa-plus"></i></div>
+<div class="form-group">
+<input type="text" class="form-control" placeholder="brand" id="brand" th:field="*{BrandName}"/>
+</div>
+<div class="form-group"></div>
+<button type="submit" class="btn btn-default"><i class="fa fa-angle-double-right"></i> search</button>
+<buton type="button"  class="btn btn-danger" id="reset" name="reset">Reset</buton>
+</form>
+<h4 th:text="${result}" style="color:red"></h4>
+</div>
+<!-- pagination -->
+<div class="pages">
+<nav class="page-nav">
+<ul class="pager">
+	<input type="hidden" id="offset" name="offset" th:value ="${offset}">
+<li class="previous"><a  class="pre" th:href="@{/pagingprev(offset=${offset},categoryId=${session.selectCategory.id},name=${session.item.name},parentCategory=${session.item.parentCategory},childCategory=${session.item.childCategory},grandChildCategory=${session.item.category},brand=${session.item.BrandName})}">&larr; prev</a></li>
+<li class="next"><a th:href="@{/pagingnext(offset=${offset},categoryId=${session.selectCategory.id},name=${session.item.name},parentCategory=${session.item.parentCategory},childCategory=${session.item.childCategory},grandChildCategory=${session.item.category},brand=${session.item.BrandName})}">next &rarr;</a></li>
+</ul>
+</nav>
+</div>
+<!-- table -->
+<td class="table-responsive">
+<table id="item-table" class="table table-hover table-condensed">
+<thead>
+<tr>
+<th>name</th>
+<th>price</th>
+<th>category</th>
+<th>brand</th>
+<th>cond</th>
+</tr>
+</thead>
+<tbody>
+<tr th:each="item:${itemList}" id="itemList">
+          <td><a th:href="@{/showItemDtail/sarchItemById?id=}+${item.id}"><div class="item-name" th:text="${item.name}">Razer BlackWidow Chroma Keyboard></div></a></td>
+            <td class="item-price" th:text="${item.price}">52.0</td>
+            <td><span th:each="category,iterStat:${item.categoryList}">
+				<span th:if="${!iterStat.first}">/</span>
+				<a th:href="@{/sarchItemByCategory?categoryId=}+${category.id}"><span th:text="${category.name}"></a></span>
+			</span>
+			</td>
+            <td class="item-brand" th:text="${item.BrandName}"></td>
+            <td class="item-condition" th:text="${item.conditionId}">3</td>
+            </div>
+          </tr>
+</tbody>
+</table>
+</div>
+<!-- pagination -->
+<div class="pages">
+<nav class="page-nav">
+<ul class="pager">
+<li class="previous"><a class="pre" th:href="@{/pagingprev(offset=${offset},categoryId=${session.selectCategory.id},name=${session.item.name},parentCategory=${session.item.parentCategory},childCategory=${session.item.childCategory},grandChildCategory=${session.item.category},brand=${session.item.BrandName})}">&larr; prev</a></li>
+<li class="next"><a th:href="@{/pagingnext((offset=${offset},categoryId=${session.selectCategory.id},name=${session.item.name},parentCategory=${session.item.parentCategory},childCategory=${session.item.childCategory},grandChildCategory=${session.item.category},brand=${session.item.BrandName})}">next &rarr;</a></li>
+</ul>
+</nav>
+<!-- ページ番号を指定して表示するフォーム -->
+<div id="select-page">
+<form class="form-inline" th:action="@{/toselectpage(offset=${offset},categoryId=${session.selectCategory.id},name=${session.item.name},parentCategory=${session.item.parentCategory},childCategory=${session.item.childCategory},grandChildCategory=${session.item.category},brand=${session.item.BrandName})}" method = "post" th:object="${itemForm}">
+<div class="form-group">
+<div class="input-group col-xs-6">
+<label></label>
+<input type="text" class="form-control" name="page" th:field="*{page}"/>
+<!-- 総ページ数 -->
+<div class="input-group-addon">/ <span th:text="${session.totalpage}" id="pagejump"></span></div>
+</div>
+<div class="input-group col-xs-1">
+<button type="submit" class="btn btn-default">Go</button>
+
+
+
+</div>
+</div>
+<div th:errors="*{page}" style="color:red"></div>
+</form>
+</div>
+</div>
+</div>
+</body>
+</html>
